@@ -253,7 +253,6 @@ select!(
     :age,
     :mstat,
     :divorce,
-    :dvrcdev,
     :ctzcntr,
     :ctzship,
     :brncntr,
