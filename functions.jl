@@ -12,6 +12,40 @@
 ##
 ## ------------------------------------------------------------------------
 
+# Function to vertically concatenate DataFrames with different columns
+function custom_vcat(dfs::Vector{DataFrame})
+    # Get all unique column names across all DataFrames
+    all_columns = unique(vcat([names(df) for df in dfs]...))
+    
+    # Process each DataFrame to include all columns
+    processed_dfs = DataFrame[]
+    for df in dfs
+        # Create a new DataFrame with missing values for missing columns
+        new_df = DataFrame()
+        
+        # Process each required column
+        for col in all_columns
+            if col in names(df)
+                # If column exists in original DataFrame, copy it
+                new_df[!, col] = df[!, col]
+            else
+                # If column doesn't exist, create it with missing values
+                new_df[!, col] = fill(missing, nrow(df))
+            end
+        end
+        
+        push!(processed_dfs, new_df)
+    end
+    
+    # Perform vertical concatenation on processed DataFrames
+    return vcat(processed_dfs...)
+end
+
+# Alternative version that accepts multiple DataFrames as arguments
+function custom_vcat(df1::DataFrame, df2::DataFrame, dfs::DataFrame...)
+    return custom_vcat(vcat([df1, df2], collect(dfs)))
+end
+
 # Function to identify migration status 
 function identify_migration_status(brncntr::Union{Float64,Missing},
     facntr::Union{Float64,Missing},
@@ -29,13 +63,13 @@ function identify_migration_status(brncntr::Union{Float64,Missing},
     # Case: Known respondent and parents' status
     if !ismissing(facntr) && !ismissing(mocntr)
         if facntr == 1 && mocntr == 1
-            return "local"
+            return "native"
         elseif brncntr == 2
             return "first-gen"
         elseif brncntr == 1 && (facntr == 2 || mocntr == 2)
             return "second-gen"
         else
-            return "local"
+            return "native"
         end
     end
 
@@ -47,12 +81,12 @@ function identify_migration_status(brncntr::Union{Float64,Missing},
            (!ismissing(mocntr) && mocntr == 1)
             return missing  # Cannot determine without both parents' information
         else
-            return "First-generation"
+            return "first-gen"
         end
     elseif brncntr == 1
         if (!ismissing(facntr) && facntr == 2) ||
            (!ismissing(mocntr) && mocntr == 2)
-            return "Second-generation"
+            return "second-gen"
         else
             return missing  # Cannot determine without both parents' information
         end
