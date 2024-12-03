@@ -19,8 +19,11 @@ using DataFrames, DataFramesMeta
 using Random
 using RData
 
-# Load data, dictionaries and functions
+# Load data
 ESS = load("Datasets_raw/ESS.RData")
+
+# Load dictionaries and functions
+include("../functions.jl")
 
 # Source scripts
 @time include("01_tidy_ESS1.jl")
