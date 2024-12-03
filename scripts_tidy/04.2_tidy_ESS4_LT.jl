@@ -255,7 +255,7 @@ select!(
     :ctzcntr,
     :brncntr,
     :cntbrth,
-    :livecntr,
+    :livecntr => :livecntr_time,
     :minority,
     :facntr,
     :fbrncnt,
